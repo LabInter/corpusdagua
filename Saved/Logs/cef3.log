@@ -1,13 +1,169 @@
-[0904/173519.767:WARNING:spdy_session.cc(3431)] Received HEADERS for invalid stream 43
-[0904/173519.767:WARNING:spdy_session.cc(3431)] Received HEADERS for invalid stream 41
-[0904/173714.237:ERROR:gpu_init.cc(426)] Passthrough is not supported, GL is disabled
-[0904/192135.597:WARNING:spdy_session.cc(3431)] Received HEADERS for invalid stream 35
-[0904/193553.888:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
+[0907/194808.830:ERROR:os_crypt_win.cc(93)] Failed to decrypt: Chave inválida para uso no estado especificado. (0x8009000B)
+[0907/194813.038:WARNING:spdy_session.cc(3431)] Received HEADERS for invalid stream 1
+[0907/195009.911:ERROR:gpu_init.cc(426)] Passthrough is not supported, GL is disabled
+[0907/201333.909:ERROR:entry_impl.cc(1075)] No file for 80000011
+[0907/201335.072:ERROR:entry_impl.cc(1075)] No file for 8000001b
+[0907/201335.072:ERROR:entry_impl.cc(1075)] No file for 80000017
+[0907/201335.072:ERROR:entry_impl.cc(1075)] No file for 8000001a
+[0907/201335.072:ERROR:entry_impl.cc(1075)] No file for 80000018
+[0907/201335.073:ERROR:entry_impl.cc(1075)] No file for 8000001c
+[0907/201335.073:ERROR:entry_impl.cc(1075)] No file for 8000001e
+[0907/201335.128:ERROR:entry_impl.cc(1075)] No file for 8000001d
+[0907/201336.182:ERROR:entry_impl.cc(1075)] No file for 80000039
+[0907/201336.182:ERROR:entry_impl.cc(1075)] No file for 8000003a
+[0907/201336.198:ERROR:entry_impl.cc(1075)] No file for 80000041
+[0907/201336.199:ERROR:entry_impl.cc(1075)] No file for 8000014d
+[0907/201336.210:ERROR:entry_impl.cc(1075)] No file for 8000005f
+[0907/201336.210:ERROR:entry_impl.cc(1075)] No file for 8000003c
+[0907/201336.210:ERROR:entry_impl.cc(1075)] No file for 8000004d
+[0907/201336.210:ERROR:entry_impl.cc(1075)] No file for 80000065
+[0907/201336.211:ERROR:entry_impl.cc(1075)] No file for 8000004f
+[0907/201336.211:ERROR:entry_impl.cc(1075)] No file for 8000003f
+[0907/201336.212:ERROR:entry_impl.cc(1075)] No file for 80000061
+[0907/201336.214:ERROR:entry_impl.cc(1075)] No file for 80000054
+[0907/201336.215:ERROR:entry_impl.cc(1075)] No file for 80000045
+[0907/201336.215:ERROR:entry_impl.cc(1075)] No file for 80000046
+[0907/201336.216:ERROR:entry_impl.cc(1075)] No file for 8000003d
+[0907/201336.216:ERROR:entry_impl.cc(1075)] No file for 80000047
+[0907/201336.230:ERROR:entry_impl.cc(1075)] No file for 80000048
+[0907/201336.230:ERROR:entry_impl.cc(1075)] No file for 80000059
+[0907/201344.122:ERROR:entry_impl.cc(1075)] No file for 80000078
+[0907/201344.122:ERROR:entry_impl.cc(1075)] No file for 80000077
+[0907/201344.122:ERROR:entry_impl.cc(1075)] No file for 8000006b
+[0907/201344.122:ERROR:entry_impl.cc(1075)] No file for 80000069
+[0907/201344.133:ERROR:entry_impl.cc(1075)] No file for 80000076
+[0907/201344.133:ERROR:entry_impl.cc(1075)] No file for 8000006f
+[0907/201344.138:ERROR:entry_impl.cc(1075)] No file for 80000075
+[0907/201344.147:ERROR:entry_impl.cc(1075)] No file for 80000071
+[0907/201344.148:ERROR:entry_impl.cc(1075)] No file for 8000006a
+[0907/201344.148:ERROR:entry_impl.cc(1075)] No file for 80000072
+[0907/201344.155:ERROR:entry_impl.cc(1075)] No file for 8000006e
+[0907/201344.155:ERROR:entry_impl.cc(1075)] No file for 8000007f
+[0907/201344.155:ERROR:entry_impl.cc(1075)] No file for 8000007b
+[0907/201344.155:ERROR:entry_impl.cc(1075)] No file for 80000080
+[0907/201344.155:ERROR:entry_impl.cc(1075)] No file for 8000007c
+[0907/201344.156:ERROR:entry_impl.cc(1075)] No file for 80000073
+[0907/201344.156:ERROR:entry_impl.cc(1075)] No file for 80000095
+[0907/201344.165:ERROR:entry_impl.cc(1075)] No file for 8000006c
+[0907/201344.165:ERROR:entry_impl.cc(1075)] No file for 8000006d
+[0907/201344.166:ERROR:entry_impl.cc(1075)] No file for 80000074
+[0907/201344.176:ERROR:entry_impl.cc(1075)] No file for 80000079
+[0907/201344.176:ERROR:entry_impl.cc(1075)] No file for 8000007d
+[0907/201344.182:ERROR:entry_impl.cc(1075)] No file for 80000070
+[0907/201347.043:ERROR:entry_impl.cc(1075)] No file for 80000083
+[0907/201347.045:ERROR:entry_impl.cc(1075)] No file for 80000084
+[0907/201347.233:ERROR:entry_impl.cc(1075)] No file for 80000092
+[0907/201347.240:ERROR:entry_impl.cc(1075)] No file for 80000098
+[0907/201347.240:ERROR:entry_impl.cc(1075)] No file for 80000082
+[0907/201347.241:ERROR:entry_impl.cc(1075)] No file for 80000088
+[0907/201347.241:ERROR:entry_impl.cc(1075)] No file for 80000081
+[0907/201347.242:ERROR:entry_impl.cc(1075)] No file for 800000af
+[0907/201347.242:ERROR:entry_impl.cc(1075)] No file for 8000009b
+[0907/201347.243:ERROR:entry_impl.cc(1075)] No file for 8000008c
+[0907/201347.243:ERROR:entry_impl.cc(1075)] No file for 80000099
+[0907/201347.243:ERROR:entry_impl.cc(1075)] No file for 8000008a
+[0907/201347.253:ERROR:entry_impl.cc(1075)] No file for 80000090
+[0907/201347.254:ERROR:entry_impl.cc(1075)] No file for 80000097
+[0907/201347.254:ERROR:entry_impl.cc(1075)] No file for 80000096
+[0907/201347.258:ERROR:entry_impl.cc(1075)] No file for 8000008f
+[0907/201347.259:ERROR:entry_impl.cc(1075)] No file for 80000085
+[0907/201347.267:ERROR:entry_impl.cc(1075)] No file for 80000087
+[0907/201347.273:ERROR:entry_impl.cc(1075)] No file for 8000008e
+[0907/201347.283:ERROR:entry_impl.cc(1075)] No file for 80000089
+[0907/201347.493:ERROR:entry_impl.cc(1075)] No file for 8000009c
+[0907/201349.389:ERROR:entry_impl.cc(1075)] No file for 8000009f
+[0907/201349.389:ERROR:entry_impl.cc(1075)] No file for 8000009e
+[0907/201349.400:ERROR:entry_impl.cc(1075)] No file for 8000008b
+[0907/201349.401:ERROR:entry_impl.cc(1075)] No file for 80000094
+[0907/201349.401:ERROR:entry_impl.cc(1075)] No file for 800000a3
+[0907/201349.402:ERROR:entry_impl.cc(1075)] No file for 800000a4
+[0907/201349.402:ERROR:entry_impl.cc(1075)] No file for 800000bc
+[0907/201349.403:ERROR:entry_impl.cc(1075)] No file for 800000a0
+[0907/201349.403:ERROR:entry_impl.cc(1075)] No file for 800000aa
+[0907/201349.410:ERROR:entry_impl.cc(1075)] No file for 800000ab
+[0907/201349.411:ERROR:entry_impl.cc(1075)] No file for 800000a2
+[0907/201349.509:ERROR:entry_impl.cc(1075)] No file for 8000009a
+[0907/201349.509:ERROR:entry_impl.cc(1075)] No file for 80000091
+[0907/201349.519:ERROR:entry_impl.cc(1075)] No file for 800000a1
+[0907/201349.519:ERROR:entry_impl.cc(1075)] No file for 8000008d
+[0907/201349.519:ERROR:entry_impl.cc(1075)] No file for 800000a6
+[0907/201349.532:ERROR:entry_impl.cc(1075)] No file for 800000ac
+[0907/201349.548:ERROR:entry_impl.cc(1075)] No file for 80000086
+[0907/201349.548:ERROR:entry_impl.cc(1075)] No file for 800000a5
+[0907/201349.556:ERROR:entry_impl.cc(1075)] No file for 8000009d
+[0907/201349.585:ERROR:entry_impl.cc(1075)] No file for 80000093
+[0907/201349.604:ERROR:entry_impl.cc(1075)] No file for 800000ad
+[0907/201352.925:ERROR:entry_impl.cc(1075)] No file for 800000b8
+[0907/201352.932:ERROR:entry_impl.cc(1075)] No file for 800000b0
+[0907/201352.938:ERROR:entry_impl.cc(1075)] No file for 800000c0
+[0907/201352.940:ERROR:entry_impl.cc(1075)] No file for 800000bf
+[0907/201352.944:ERROR:entry_impl.cc(1075)] No file for 800000b6
+[0907/201352.944:ERROR:entry_impl.cc(1075)] No file for 800000b3
+[0907/201352.949:ERROR:entry_impl.cc(1075)] No file for 800000be
+[0907/201352.949:ERROR:entry_impl.cc(1075)] No file for 800000b1
+[0907/201352.950:ERROR:entry_impl.cc(1075)] No file for 800000b2
+[0907/201352.964:ERROR:entry_impl.cc(1075)] No file for 800000b7
+[0907/201352.965:ERROR:entry_impl.cc(1075)] No file for 800000bb
+[0907/201352.971:ERROR:entry_impl.cc(1075)] No file for 800000bd
+[0907/201353.032:ERROR:entry_impl.cc(1075)] No file for 800000a8
+[0907/201353.033:ERROR:entry_impl.cc(1075)] No file for 800000b4
+[0907/201354.147:ERROR:entry_impl.cc(1075)] No file for 800000ca
+[0907/201354.147:ERROR:entry_impl.cc(1075)] No file for 800000b9
+[0907/201354.215:ERROR:entry_impl.cc(1075)] No file for 800000c5
+[0907/201354.215:ERROR:entry_impl.cc(1075)] No file for 800000cf
+[0907/201354.228:ERROR:entry_impl.cc(1075)] No file for 800000ba
+[0907/201354.228:ERROR:entry_impl.cc(1075)] No file for 800000c8
+[0907/201354.232:ERROR:entry_impl.cc(1075)] No file for 800000c6
+[0907/201354.256:ERROR:entry_impl.cc(1075)] No file for 800000b5
+[0907/201354.296:ERROR:entry_impl.cc(1075)] No file for 800000d7
+[0907/201354.297:ERROR:entry_impl.cc(1075)] No file for 800000d3
+[0907/201354.297:ERROR:entry_impl.cc(1075)] No file for 800000c3
+[0907/201354.311:ERROR:entry_impl.cc(1075)] No file for 800000c7
+[0907/201354.311:ERROR:entry_impl.cc(1075)] No file for 800000cd
+[0907/201354.311:ERROR:entry_impl.cc(1075)] No file for 800000d4
+[0907/201354.311:ERROR:entry_impl.cc(1075)] No file for 800000d2
+[0907/201354.312:ERROR:entry_impl.cc(1075)] No file for 800000c2
+[0907/201354.321:ERROR:entry_impl.cc(1075)] No file for 800000ce
+[0907/201354.321:ERROR:entry_impl.cc(1075)] No file for 800000d6
+[0907/201354.322:ERROR:entry_impl.cc(1075)] No file for 800000d5
+[0907/201354.323:ERROR:entry_impl.cc(1075)] No file for 800000cc
+[0907/201354.327:ERROR:entry_impl.cc(1075)] No file for 800000cb
+[0907/201354.327:ERROR:entry_impl.cc(1075)] No file for 800000c1
+[0907/201354.332:ERROR:entry_impl.cc(1075)] No file for 800000c9
+[0907/201355.427:ERROR:entry_impl.cc(1075)] No file for 800000d0
+[0907/201355.430:ERROR:entry_impl.cc(1075)] No file for 800000d1
+[0907/201355.432:ERROR:entry_impl.cc(1075)] No file for 800000db
+[0907/201355.433:ERROR:entry_impl.cc(1075)] No file for 800000e2
+[0907/201355.436:ERROR:entry_impl.cc(1075)] No file for 800000fc
+[0907/201355.437:ERROR:entry_impl.cc(1075)] No file for 800000e3
+[0907/201355.437:ERROR:entry_impl.cc(1075)] No file for 800000ec
+[0907/201355.437:ERROR:entry_impl.cc(1075)] No file for 800000eb
+[0907/201355.438:ERROR:entry_impl.cc(1075)] No file for 800000ea
+[0907/201355.443:ERROR:entry_impl.cc(1075)] No file for 800000e0
+[0907/201355.444:ERROR:entry_impl.cc(1075)] No file for 800000df
+[0907/201355.444:ERROR:entry_impl.cc(1075)] No file for 800000e4
+[0907/201355.460:ERROR:entry_impl.cc(1075)] No file for 800000e1
+[0907/201355.460:ERROR:entry_impl.cc(1075)] No file for 800000da
+[0907/201355.461:ERROR:entry_impl.cc(1075)] No file for 800000e6
+[0907/201355.549:ERROR:entry_impl.cc(1075)] No file for 800000d8
+[0907/201355.549:ERROR:entry_impl.cc(1075)] No file for 800000de
+[0907/201355.562:ERROR:entry_impl.cc(1075)] No file for 800000e8
+[0907/201355.573:ERROR:entry_impl.cc(1075)] No file for 800000dc
+[0907/201355.664:ERROR:entry_impl.cc(1075)] No file for 800000dd
+[0907/201733.322:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
 C:\fakepath(102,1-6): warning X4000: use of potentially uninitialized variable (dyn_index_vec4_float4)
 
-[0904/193554.096:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
+[0907/201733.574:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
 C:\fakepath(135,1): warning X4000: use of potentially uninitialized variable (f_i)
 C:\fakepath(137,1): warning X4000: use of potentially uninitialized variable (f_i)
 C:\fakepath(173,1): warning X4000: use of potentially uninitialized variable (f_u)
 
-[0904/193600.238:WARNING:spdy_session.cc(3431)] Received HEADERS for invalid stream 11
+[0907/201734.572:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
+C:\fakepath(165,1): warning X4000: use of potentially uninitialized variable (f_renderMipMapLevel)
+
+[0907/201734.578:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
+C:\fakepath(165,1): warning X4000: use of potentially uninitialized variable (f_renderMipMapLevel)
+
+[0907/201734.589:WARNING:angle_platform_impl.cc(48)] HLSLCompiler.cpp:257 (compileToBinary): 
+C:\fakepath(165,1): warning X4000: use of potentially uninitialized variable (f_renderMipMapLevel)
+
