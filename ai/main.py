@@ -4,7 +4,7 @@ import socket
 import json
 
 # Comunicação com Unreal via socket UDP
-UDP_IP = "127.0.0.5
+UDP_IP = "127.0.0.5"
 UDP_PORT = 5005
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
