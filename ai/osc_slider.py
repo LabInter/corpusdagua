@@ -2,8 +2,8 @@ from pythonosc.udp_client import SimpleUDPClient
 import tkinter as tk
 
 
-OSC_IP = "192.168.0.8"
-OSC_PORT = 8001
+OSC_IP = "127.0.0.1"
+OSC_PORT = 8000
 OSC_ADDRESS = "/construcao"
 
 

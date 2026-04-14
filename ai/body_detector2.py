@@ -5,9 +5,9 @@ import mediapipe as mp # --- ### NOVO: Importa a biblioteca MediaPipe ### ---
 
 # --- CONFIGURAÇÕES OSC ---
 OSC_IP = "10.0.0.42" # IP do computador rodando a Unreal. Mantenha 127.0.0.1 se for o mesmo PC.
-OSC_PORT = 7400  # Porta que a Unreal estará escutando.
+OSC_PORT = 8001  # Porta que a Unreal estará escutando.
 client = udp_client.SimpleUDPClient(OSC_IP, OSC_PORT)
-client2 = udp_client.SimpleUDPClient("10.0.0.42", 7400)
+client2 = udp_client.SimpleUDPClient("10.0.0.42", 8002)
 
 # --- ### NOVO: CONTAGEM DE PASSAGEM DE PESSOAS ### ---
 total_people_passed = 0 # Variável para a contagem total acumulada

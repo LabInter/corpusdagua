@@ -3,8 +3,8 @@ import numpy as np
 from pythonosc.udp_client import SimpleUDPClient
 
 # --- CONFIGURAÇÕES OSC ---
-OSC_IP = "10.0.0.42"
-OSC_PORT = 8001
+OSC_IP = "127.0.0.1"
+OSC_PORT = 8000
 client = SimpleUDPClient(OSC_IP, OSC_PORT)
 
 # --- CONFIGURAÇÕES DE CONTAGEM ---
