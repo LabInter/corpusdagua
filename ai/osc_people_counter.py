@@ -8,8 +8,8 @@ OSC_PORT = 8000
 client = SimpleUDPClient(OSC_IP, OSC_PORT)
 
 # --- CONFIGURAÇÕES DE LÓGICA ---
-MAX_PEOPLE = 5      # 1 pessoa = 0.2 (pouca chuva) | 5 pessoas = 1.0 (chuva intensa)
-LERP_SPEED = 0.03   # Transição suave
+MAX_PEOPLE = 5      # 0 pessoas = 0.0 | 1 pessoa = 0.2 | 5 pessoas = 1.0 (máxima)
+LERP_SPEED = 0.05   # Aumentado levemente para a resposta da chuva ser mais rápida e visível
 
 # --- ESTADO ---
 valor_atual = 0.0
@@ -56,21 +56,27 @@ while True:
                 (startX, startY, endX, endY) = box.astype("int")
                 cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-    # --- LÓGICA DE TESTE ---
-    # Se o modo teste estiver ativo, ignoramos a câmera e forçamos 5 pessoas
-    pessas_para_calculo = 5 if modo_teste else current_frame_people
+    # --- LÓGICA DE TESTE / CÁLCULO ---
+    pessoas_para_calculo = 5 if modo_teste else current_frame_people
     
-    valor_alvo = min(pessas_para_calculo / MAX_PEOPLE, 1.0)
+    # Garante que o valor alvo fique estritamente entre 0.0 e 1.0
+    valor_alvo = float(np.clip(pessoas_para_calculo / MAX_PEOPLE, 0.0, 1.0))
 
-    # Suavização e envio
-    if abs(valor_alvo - valor_atual) > 0.001:
-        valor_atual += (valor_alvo - valor_atual) * LERP_SPEED
-        client.send_message("/construcao", float(valor_atual))
+    # Interpolação suave (Lerp)
+    valor_atual += (valor_alvo - valor_atual) * LERP_SPEED
+    
+    # Força a zerar ou maximizar se estiver muito próximo para evitar oscilações infinitas
+    if abs(valor_atual - valor_alvo) < 0.005:
+        valor_atual = valor_alvo
 
-    # --- UI ---
+    # ENVIO CONSTANTE: Garante que a Unreal saiba exatamente a intensidade a cada frame
+    client.send_message("/construcao", float(valor_atual))
+
+    # --- UI DO DETECTOR ---
     status = "TESTE ATIVO (Simulando 5)" if modo_teste else "Monitorando Real"
     cv2.putText(frame, f"Modo: {status}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
     cv2.putText(frame, f"Chuva: {int(valor_atual*100)}%", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+    cv2.putText(frame, f"Pessoas: {pessoas_para_calculo}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
     
     cv2.imshow("Detector para Unreal", frame)
 
@@ -80,7 +86,7 @@ while True:
         break
     elif key == ord('t') or key == ord('T'):
         print("Alternando Modo Teste...")
-        modo_teste = not modo_teste # Liga/Desliga o teste ao apertar 'T'
+        modo_teste = not modo_teste
 
 cap.release()
 cv2.destroyAllWindows()
