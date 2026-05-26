@@ -71,6 +71,7 @@ while True:
 
     # ENVIO CONSTANTE: Garante que a Unreal saiba exatamente a intensidade a cada frame
     client.send_message("/construcao", float(valor_atual))
+    client.send_message("/info-quadro", int(startX), int(startY), int(endX), int(endY), int(current_frame_people))
 
     # --- UI DO DETECTOR ---
     status = "TESTE ATIVO (Simulando 5)" if modo_teste else "Monitorando Real"
