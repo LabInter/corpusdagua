@@ -44,6 +44,7 @@ while True:
     detections = net.forward()
 
     current_frame_people = 0
+    startX = startY = endX = endY = 0
 
     # Contagem real pela câmera
     for i in np.arange(0, detections.shape[2]):
@@ -71,7 +72,8 @@ while True:
 
     # ENVIO CONSTANTE: Garante que a Unreal saiba exatamente a intensidade a cada frame
     client.send_message("/construcao", float(valor_atual))
-    client.send_message("/info-quadro", int(startX), int(startY), int(endX), int(endY), int(current_frame_people))
+    valores_osc = [int(startX), int(startY), int(endX), int(endY), int(current_frame_people)]
+    client.send_message("/info-quadro", valores_osc)
 
     # --- UI DO DETECTOR ---
     status = "TESTE ATIVO (Simulando 5)" if modo_teste else "Monitorando Real"
