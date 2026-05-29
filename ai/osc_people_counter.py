@@ -3,8 +3,8 @@ import numpy as np
 from pythonosc.udp_client import SimpleUDPClient
 
 # --- CONFIGURAÇÕES OSC ---
-OSC_IP = "127.0.0.1"
-OSC_PORT = 8000
+OSC_IP = "10.0.0.131"
+OSC_PORT = 7400
 client = SimpleUDPClient(OSC_IP, OSC_PORT)
 
 # --- CONFIGURAÇÕES DE LÓGICA ---
@@ -72,6 +72,7 @@ while True:
 
     # ENVIO CONSTANTE: Garante que a Unreal saiba exatamente a intensidade a cada frame
     client.send_message("/construcao", float(valor_atual))
+
     valores_osc = [int(startX), int(startY), int(endX), int(endY), int(current_frame_people)]
     client.send_message("/info-quadro", valores_osc)
 
