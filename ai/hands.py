@@ -2,8 +2,8 @@ import cv2
 import mediapipe as mp
 from pythonosc import udp_client
 
-OSC_IP = "192.168.0.12"
-OSC_PORT = 8001
+OSC_IP = "10.0.0.131"
+OSC_PORT = 7400
 client = udp_client.SimpleUDPClient(OSC_IP, OSC_PORT)
 
 mp_hands = mp.solutions.hands
