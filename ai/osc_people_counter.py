@@ -4,8 +4,8 @@ from pythonosc.udp_client import SimpleUDPClient
 import mediapipe as mp
 
 # --- CONFIGURAÇÕES OSC ---
-OSC_IP = "10.0.0.131"
-OSC_PORT = 7400
+OSC_IP = "127.0.0.1"
+OSC_PORT = 8000
 client = SimpleUDPClient(OSC_IP, OSC_PORT)
 
 # --- CONFIGURAÇÕES DE LÓGICA ---
