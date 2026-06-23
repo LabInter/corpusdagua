@@ -1,153 +1,255 @@
 import cv2
 import numpy as np
-from pythonosc.udp_client import SimpleUDPClient
-import mediapipe as mp
+import urllib.request
+import os
 
-# --- CONFIGURAÇÕES OSC ---
+import mediapipe as mp
+from mediapipe.tasks import python as mp_python
+from mediapipe.tasks.python import vision as mp_vision
+
+from ultralytics import YOLO
+from pythonosc.udp_client import SimpleUDPClient
+
+
+# ---------------- OSC ----------------
+
 OSC_IP = "127.0.0.1"
 OSC_PORT = 8000
+
 client = SimpleUDPClient(OSC_IP, OSC_PORT)
 
-# --- CONFIGURAÇÕES DE LÓGICA ---
-MAX_PEOPLE = 5      
-LERP_SPEED = 0.05   
+# ---------------- CONFIG ----------------
 
-# --- CONFIGURAÇÃO DE TAMANHO DA JANELA DA TELA ---
-# Altere aqui para o tamanho que deseja visualizar no monitor
-LARGURA_EXIBICAO = 1920  
+MAX_PEOPLE = 5
+LERP_SPEED = 0.05
+
+LARGURA_EXIBICAO = 1920
 ALTURA_EXIBICAO = 1080
 
-# --- ESTADO ---
 valor_atual = 0.0
-valor_alvo = 0.0
-modo_teste = False  
+modo_teste = False
 
-# --- CONFIGURAR MEDIAPIPE (MÃOS) ---
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(
-    static_image_mode=False,
-    max_num_hands=2,        
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
+# ---------------- MODELO MEDIAPIPE ----------------
+
+MODEL_PATH = "hand_landmarker.task"
+MODEL_URL = (
+    "https://storage.googleapis.com/mediapipe-models/"
+    "hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
 )
-mp_draw = mp.solutions.drawing_utils
 
-# --- CARREGAR MODELO DE PESSOAS ---
-try:
-    net = cv2.dnn.readNetFromCaffe('MobileNetSSD_deploy.prototxt.txt', 'MobileNetSSD_deploy.caffemodel')
-except:
-    print("ERRO: Arquivos do modelo MobileNetSSD não encontrados!")
-    exit()
+if not os.path.exists(MODEL_PATH):
+    print("Baixando modelo hand_landmarker.task...")
+    urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+    print("Modelo baixado.")
 
-CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-           "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-           "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-           "sofa", "train", "tvmonitor"]
+# ---------------- YOLO ----------------
 
-# --- CONFIGURAR ENTRADA DA CÂMERA ---
+model_yolo = YOLO("yolov8n.pt")
+
+# ---------------- CAMERA ----------------
+
 cap = cv2.VideoCapture(0)
-# Tenta definir a captura nativa para HD (o OpenCV ajusta para o máximo suportado pela webcam)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-# --- CONFIGURAR JANELA INTERATIVA ---
-NOME_JANELA = "Detector HD - Correcao Lados"
-cv2.namedWindow(NOME_JANELA, cv2.WINDOW_NORMAL) # Permite maximizar e redimensionar livremente
-cv2.resizeWindow(NOME_JANELA, LARGURA_EXIBICAO, ALTURA_EXIBICAO)
+if not cap.isOpened():
+    raise RuntimeError("Não foi possível abrir a câmera.")
 
-print("COMANDOS:")
-print("'q' - Sair")
-print("'t' - Alternar Modo Teste (Simular 5 pessoas)")
+# ---------------- WINDOW ----------------
 
-while True:
-    ret, frame = cap.read()
-    if not ret: break
+WINDOW_NAME = "Detector Pessoas + Maos"
+cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+cv2.resizeWindow(WINDOW_NAME, LARGURA_EXIBICAO, ALTURA_EXIBICAO)
 
-    # Espelha o frame para que o movimento seja natural (comportamento de espelho)
-    frame = cv2.flip(frame, 1)
-    (h, w) = frame.shape[:2]
-    
-    # --- 1. DETECÇÃO DE PESSOAS (MobileNetSSD) ---
-    blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 0.007843, (300, 300), 127.5)
-    net.setInput(blob)
-    detections = net.forward()
-    current_frame_people = 0
+# ---------------- DESENHO DE LANDMARKS (sem solutions) ----------------
 
-    for i in np.arange(0, detections.shape[2]):
-        confidence = detections[0, 0, i, 2]
-        if confidence > 0.5:
-            idx = int(detections[0, 0, i, 1])
-            if CLASSES[idx] == "person":
+# 21 conexões da mão (índices dos landmarks)
+HAND_CONNECTIONS = [
+    (0, 1), (1, 2), (2, 3), (3, 4),        # polegar
+    (0, 5), (5, 6), (6, 7), (7, 8),        # indicador
+    (0, 9), (9, 10), (10, 11), (11, 12),   # médio
+    (0, 13), (13, 14), (14, 15), (15, 16), # anelar
+    (0, 17), (17, 18), (18, 19), (19, 20), # mínimo
+    (5, 9), (9, 13), (13, 17),             # palma
+]
+
+
+def draw_hand_landmarks(frame, landmarks, cor_ponto, cor_linha):
+    h, w = frame.shape[:2]
+
+    # Converte coordenadas normalizadas para pixels
+    pontos = [
+        (int(lm.x * w), int(lm.y * h))
+        for lm in landmarks
+    ]
+
+    # Desenha conexões
+    for a, b in HAND_CONNECTIONS:
+        cv2.line(frame, pontos[a], pontos[b], cor_linha, 2)
+
+    # Desenha pontos
+    for px, py in pontos:
+        cv2.circle(frame, (px, py), 5, cor_ponto, -1)
+
+
+# ---------------- MEDIAPIPE HAND LANDMARKER ----------------
+
+base_options = mp_python.BaseOptions(model_asset_path=MODEL_PATH)
+
+options = mp_vision.HandLandmarkerOptions(
+    base_options=base_options,
+    running_mode=mp_vision.RunningMode.VIDEO,
+    num_hands=2,
+    min_hand_detection_confidence=0.5,
+    min_hand_presence_confidence=0.5,
+    min_tracking_confidence=0.5,
+)
+
+print("q = sair")
+print("t = modo teste")
+
+frame_timestamp_ms = 0
+
+with mp_vision.HandLandmarker.create_from_options(options) as landmarker:
+
+    while True:
+
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        frame = cv2.flip(frame, 1)
+        h, w = frame.shape[:2]
+
+        # ====================================
+        # YOLO - PESSOAS
+        # ====================================
+
+        current_frame_people = 0
+        yolo_results = model_yolo(frame, verbose=False)
+
+        for result in yolo_results:
+            for box in result.boxes:
+
+                cls = int(box.cls[0])
+                if cls != 0:
+                    continue
+
+                conf = float(box.conf[0])
+                if conf < 0.4:
+                    continue
+
                 current_frame_people += 1
-                box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                (startX, startY, endX, endY) = box.astype("int")
-                cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-    # --- 2. DETECÇÃO E CLASSIFICAÇÃO DAS MÃOS (MediaPipe) ---
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = hands.process(rgb_frame)
-    
-    maos_detectadas = {"Left": False, "Right": False}
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-    if results.multi_hand_landmarks and results.multi_handedness:
-        for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
-            lado_da_mao = results.multi_handedness[idx].classification[0].label
-            
-            # Correção de espelhamento: Left mapeia para Left do usuário na tela
-            if lado_da_mao == "Left":
-                lado_real = "Left"
-            else:
-                lado_real = "Right"
-                
-            maos_detectadas[lado_real] = True
-            
-            mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-            
-            ponto_central = hand_landmarks.landmark[0]
-            
-            # Normaliza para o plano cartesiano (-1.0 a 1.0)
-            mao_x = float((ponto_central.x * 2.0) - 1.0)
-            mao_y = float(((1.0 - ponto_central.y) * 2.0) - 1.0)
-            
-            # Envia os dados via OSC
-            if lado_real == "Left":
-                client.send_message("/posicao_mao_esquerda", [mao_x, mao_y])
-                cv2.putText(frame, f"Esq X: {mao_x:.2f} Y: {mao_y:.2f}", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
-            elif lado_real == "Right":
-                client.send_message("/posicao_mao_direita", [mao_x, mao_y])
-                cv2.putText(frame, f"Dir X: {mao_x:.2f} Y: {mao_y:.2f}", (20, 190), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
+        # ====================================
+        # MEDIAPIPE HAND LANDMARKER
+        # ====================================
 
-            px = int(ponto_central.x * w)
-            py = int(ponto_central.y * h)
-            cor = (255, 0, 0) if lado_real == "Left" else (0, 165, 255)
-            cv2.circle(frame, (px, py), 12, cor, -1)
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
-    # --- LÓGICA DE TESTE DA CHUVA ---
-    pessoas_para_calculo = 5 if modo_teste else current_frame_people
-    valor_alvo = float(np.clip(pessoas_para_calculo / MAX_PEOPLE, 0.0, 1.0))
-    valor_atual += (valor_alvo - valor_atual) * LERP_SPEED
-    if abs(valor_atual - valor_alvo) < 0.005: valor_atual = valor_alvo
+        frame_timestamp_ms += 33  # ~30 fps
 
-    client.send_message("/construcao", float(valor_atual))
+        hand_result = landmarker.detect_for_video(
+            mp_image,
+            frame_timestamp_ms
+        )
 
-    # --- UI DO DETECTOR ---
-    status = "TESTE ATIVO" if modo_teste else "Monitorando Real"
-    cv2.putText(frame, f"Modo: {status}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-    cv2.putText(frame, f"Chuva: {int(valor_atual*100)}%", (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
-    cv2.putText(frame, f"Pessoas: {pessoas_para_calculo}", (20, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-    
-    if not maos_detectadas["Left"]:
-        cv2.putText(frame, "Mao Esq: Ausente", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (120, 120, 120), 2)
-    if not maos_detectadas["Right"]:
-        cv2.putText(frame, "Mao Dir: Ausente", (20, 190), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (120, 120, 120), 2)
-        
-    # Redimensiona o frame final para o tamanho gigante escolhido antes de exibir
-    frame_gigante = cv2.resize(frame, (LARGURA_EXIBICAO, ALTURA_EXIBICAO))
-    cv2.imshow(NOME_JANELA, frame_gigante)
+        if hand_result.hand_landmarks:
 
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q') or key == ord('Q'): break
-    elif key == ord('t') or key == ord('T'): modo_teste = not modo_teste
+            for idx, landmarks in enumerate(hand_result.hand_landmarks):
+
+                handedness = hand_result.handedness[idx][0].display_name
+
+                # Cores: azul = esquerda, laranja = direita
+                if handedness == "Left":
+                    cor_ponto = (255, 80, 80)
+                    cor_linha = (200, 50, 50)
+                else:
+                    cor_ponto = (80, 165, 255)
+                    cor_linha = (50, 130, 200)
+
+                draw_hand_landmarks(frame, landmarks, cor_ponto, cor_linha)
+
+                # Pulso = landmark 0
+                wrist = landmarks[0]
+                mao_x = float((wrist.x * 2.0) - 1.0)
+                mao_y = float(((1.0 - wrist.y) * 2.0) - 1.0)
+
+                px = int(wrist.x * w)
+                py = int(wrist.y * h)
+
+                cv2.circle(frame, (px, py), 12, cor_ponto, -1)
+
+                # Label da mão
+                cv2.putText(
+                    frame,
+                    handedness,
+                    (px + 15, py),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    cor_ponto,
+                    2
+                )
+
+                if handedness == "Left":
+                    client.send_message(
+                        "/posicao_mao_esquerda",
+                        [mao_x, mao_y]
+                    )
+                else:
+                    client.send_message(
+                        "/posicao_mao_direita",
+                        [mao_x, mao_y]
+                    )
+
+        # ====================================
+        # LERP CHUVA
+        # ====================================
+
+        pessoas = 5 if modo_teste else current_frame_people
+
+        valor_alvo = np.clip(pessoas / MAX_PEOPLE, 0.0, 1.0)
+        valor_atual += (valor_alvo - valor_atual) * LERP_SPEED
+
+        client.send_message("/construcao", float(valor_atual))
+
+        # ====================================
+        # UI
+        # ====================================
+
+        cv2.putText(
+            frame, f"Pessoas: {pessoas}",
+            (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
+            1, (0, 255, 0), 2
+        )
+
+        cv2.putText(
+            frame, f"Chuva: {int(valor_atual * 100)}%",
+            (20, 80), cv2.FONT_HERSHEY_SIMPLEX,
+            1, (255, 255, 255), 2
+        )
+
+        if modo_teste:
+            cv2.putText(
+                frame, "MODO TESTE",
+                (20, 120), cv2.FONT_HERSHEY_SIMPLEX,
+                1, (0, 0, 255), 2
+            )
+
+        frame_show = cv2.resize(frame, (LARGURA_EXIBICAO, ALTURA_EXIBICAO))
+        cv2.imshow(WINDOW_NAME, frame_show)
+
+        key = cv2.waitKey(1) & 0xFF
+
+        if key in (ord("q"), ord("Q")):
+            break
+
+        if key in (ord("t"), ord("T")):
+            modo_teste = not modo_teste
 
 cap.release()
 cv2.destroyAllWindows()
