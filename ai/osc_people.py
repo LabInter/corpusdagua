@@ -51,6 +51,10 @@ class Config:
     ratio_open: float = 1.83
     debug_openness: bool = False
 
+    # Limiar para considerar a mão aberta (1) ou fechada (0)
+    # Valores >= 0.5 serão considerados 1 (aberta), abaixo disso 0 (fechada)
+    hand_open_threshold: float = 0.5
+
     window_name: str = "Detector Pessoas + Maos"
 
 
@@ -159,12 +163,6 @@ def normalize_point(px: float, py: float, w: int, h: int) -> tuple[float, float]
 def detect_people(
     frame: np.ndarray, model: YOLO, device: str, use_half: bool, config: Config
 ) -> list[Person]:
-    """Detecta pessoas no frame e retorna cada uma com bbox e centro normalizado.
-
-    Filtrar por classe (`classes=`) e confiança (`conf=`) direto na chamada do
-    YOLO evita rodar NMS/pós-processamento para classes que não usamos e
-    remove o laço de filtragem manual que existia antes em Python.
-    """
     h, w = frame.shape[:2]
     results = model(
         frame,
@@ -203,13 +201,6 @@ def draw_people(frame: np.ndarray, people: list[Person]) -> None:
 # DETECÇÃO DE MÃOS (MEDIAPIPE)
 # ==========================================================
 def calculate_hand_openness(landmarks, config: Config) -> float:
-    """Calcula quão aberta está a mão (0.0 = Fechada / Punho, 1.0 = Totalmente Aberta).
-
-    A referência de escala (hand_size) usa o MCP do dedo médio (landmark 9),
-    que fica praticamente fixo independente da mão estar aberta ou fechada —
-    diferente de usar a ponta de um dedo, que também entraria na média abaixo
-    e distorceria o resultado.
-    """
     wrist = landmarks[WRIST_ID]
     hand_size = math.hypot(
         landmarks[MIDDLE_MCP_ID].x - wrist.x, landmarks[MIDDLE_MCP_ID].y - wrist.y
@@ -239,7 +230,6 @@ def draw_hand_skeleton(frame, points, color_point, color_line) -> None:
 
 
 def get_handedness(raw_handedness: str) -> str:
-    """Inverte a lateralidade pois o frame é espelhado antes da detecção."""
     return "Right" if raw_handedness == "Left" else "Left"
 
 
@@ -274,11 +264,15 @@ def process_hands(frame, hand_result, people: list[Person], config: Config) -> N
         pt_coords = [(int(lm.x * w), int(lm.y * h)) for lm in landmarks]
         draw_hand_skeleton(frame, pt_coords, point_color, line_color)
 
+        # Exibição no vídeo: mostra estado booleano (Aberto/Fechado) e % original
+        is_open_bool = openness >= config.hand_open_threshold
+        state_label = "Aberta" if is_open_bool else "Fechada"
+
         cv2.circle(frame, (wrist_x, wrist_y), 8, (0, 255, 255), -1)
         cv2.putText(
             frame,
-            f"{int(openness * 100)}%",
-            (wrist_x - 20, wrist_y - 15),
+            f"{state_label} ({int(openness * 100)}%)",
+            (wrist_x - 40, wrist_y - 15),
             FONT,
             0.5,
             (0, 255, 255),
@@ -299,21 +293,44 @@ def process_hands(frame, hand_result, people: list[Person], config: Config) -> N
 # ==========================================================
 # OSC
 # ==========================================================
-def _hand_or_default(hand: Optional[HandInfo]) -> tuple[float, float, float]:
+def _hand_or_default(hand: Optional[HandInfo], config: Config = CONFIG) -> tuple[float, float, int]:
+    """Retorna os dados da mão. 
+    
+    A abertura retorna:
+      1 : Mão Aberta (True)
+      0 : Mão Fechada (False)
+     -1 : Mão não encontrada
+    """
     if hand is None:
-        return -2.0, -2.0, -1.0
-    return hand.x, hand.y, hand.openness
+        return -2.0, -2.0, -1
+    
+    # Converte o float de abertura para 1 (True / Aberta) ou 0 (False / Fechada)
+    openness_binary = 1 if hand.openness >= config.hand_open_threshold else 0
+    return hand.x, hand.y, openness_binary
 
 
-def send_osc_data(client: SimpleUDPClient, people: list[Person]) -> None:
+def send_osc_data(client: SimpleUDPClient, people: list[Person], config: Config = CONFIG) -> None:
     client.send_message("/people/count", len(people))
 
     osc_people = []
-    for person in people:
+    for i, person in enumerate(people, start=1):
         px, py = person.center
-        lx, ly, lo = _hand_or_default(person.left_hand)
-        rx, ry, ro = _hand_or_default(person.right_hand)
+        lx, ly, lo = _hand_or_default(person.left_hand, config)
+        rx, ry, ro = _hand_or_default(person.right_hand, config)
+        
+        # Envio padrão unificado no endereço /people
         osc_people.extend([px, py, lx, ly, lo, rx, ry, ro])
+
+        client.send_message(f"/people/{i}", [float(px), float(py)])
+        
+        # Envios para as rotas específicas por pessoa e mão
+        if person.left_hand is not None:
+            lh_state = "aberta" if person.left_hand.openness >= config.hand_open_threshold else "fechada"
+            client.send_message(f"/people/{i}/mao_esquerda_{lh_state}", 1)
+
+        if person.right_hand is not None:
+            rh_state = "aberta" if person.right_hand.openness >= config.hand_open_threshold else "fechada"
+            client.send_message(f"/people/{i}/mao_direita_{rh_state}", 1)
 
     client.send_message("/people", osc_people)
 
@@ -341,8 +358,12 @@ def draw_hud(frame, people: list[Person], person_count: int, state: AppState) ->
 
     for i, person in enumerate(people):
         px, py = person.center
-        lh_str = f"L:{int(person.left_hand.openness * 100)}%" if person.left_hand else "L:Nao"
-        rh_str = f"R:{int(person.right_hand.openness * 100)}%" if person.right_hand else "R:Nao"
+        
+        lh_val = "Nao" if not person.left_hand else ("Aberta" if person.left_hand.openness >= CONFIG.hand_open_threshold else "Fechada")
+        rh_val = "Nao" if not person.right_hand else ("Aberta" if person.right_hand.openness >= CONFIG.hand_open_threshold else "Fechada")
+
+        lh_str = f"L:{lh_val}"
+        rh_str = f"R:{rh_val}"
 
         cv2.putText(
             frame,
@@ -393,11 +414,11 @@ def main() -> None:
 
                 process_hands(frame, hand_result, people, config)
 
-                send_osc_data(client, people)
+                send_osc_data(client, people, config)
 
                 person_count = config.max_people if state.test_mode else len(people)
                 update_rain_value(state, person_count, config)
-                client.send_message("/construcao", float(state.rain_value))
+                client.send_message("/people/count", float(state.rain_value))
 
                 draw_hud(frame, people, person_count, state)
 
